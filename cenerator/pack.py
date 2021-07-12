@@ -97,8 +97,8 @@ class Pack:
             def call() -> str:
                 return f'function {identifier}'
 
-            identifier.name = 'functions/' + identifier.name
-            file_path = self._data_dir / identifier.data_path('.mcfunction')
+            
+            file_path = self._data_dir / self.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w') as file:
                 f(C(self, lambda c: file.write(f'{c}\n')))
