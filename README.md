@@ -9,6 +9,20 @@ A Minecraft data pack creation utility
 * Some convenient shorthand features
 * Outputs everything in a data pack, ready to go
 
+## Installation
+
+Installed with pip, something like
+
+```
+pip3 install -U cenerator
+```
+
+Or perhaps on Windows
+
+```
+py -m pip install -U cenerator
+```
+
 ## Example usage
 
 See `examples/` directory for more examples.
