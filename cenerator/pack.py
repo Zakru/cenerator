@@ -45,7 +45,7 @@ class C:
         identifier = self.pack.parse_identifier(f'ex_{self.pack._ex_c}')
         self.pack._ex_c += 1
 
-        file_path = self.pack._data_dir / identifier.data_path('.mcfunction')
+        file_path = self.pack._data_dir / self.pack.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with file_path.open('w') as file:
             yield C(self.pack, lambda c: file.write(f'{c}\n'))
