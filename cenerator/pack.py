@@ -1,5 +1,5 @@
 """
-Copyright (c) 2021 Zakru
+Copyright (c) 2021-2023 Zakru
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@ SOFTWARE.
 """
 
 from contextlib import contextmanager
+from io import TextIOWrapper
 import json
 from numbers import Real
 from pathlib import Path
@@ -45,9 +46,8 @@ class C:
         identifier = self.pack.parse_identifier(f'ex_{self.pack._ex_c}')
         self.pack._ex_c += 1
 
-        file_path = self.pack._data_dir / self.pack.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        with file_path.open('w') as file:
+        data_path = self.pack.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
+        with self.pack.open_data(data_path) as file:
             yield C(self.pack, lambda c: file.write(f'{c}\n'))
         self(f'execute {setup} run function {identifier}')
 
@@ -76,7 +76,7 @@ class Pack:
         self._open_tags = {}
         self._ex_c = 1 # execute counter
         self._st_c = -1 # storage variable counter
-        with (self.pack_dir / 'pack.mcmeta').open('w') as meta:
+        with self.open('pack.mcmeta') as meta:
             json.dump({
                 'pack': {
                     'pack_format': 7,
@@ -98,9 +98,8 @@ class Pack:
                 return f'function {identifier}'
 
             
-            file_path = self._data_dir / self.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            with file_path.open('w') as file:
+            data_path = self.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
+            with self.open_data(data_path) as file:
                 f(C(self, lambda c: file.write(f'{c}\n')))
 
             for tag in tags:
@@ -115,11 +114,9 @@ class Pack:
     def add_to_tag(self, tag: Identifier, item: str) -> None:
         tag.name = f'tags/{tag.name}'
         values = self._open_tags[str(tag)] if str(tag) in self._open_tags else []
-        file_path = self._data_dir / tag.data_path('.json')
-        file_path.parent.mkdir(parents=True, exist_ok=True)
         values.append(item)
         self._open_tags[str(tag)] = values
-        with file_path.open('w') as f:
+        with self.open_data(tag.data_path('.json')) as f:
             json.dump({ 'values': values }, f)
     
     def st_path(self) -> str:
@@ -130,3 +127,23 @@ class Pack:
     def include_all(self, directory: str) -> None:
         """Copy files from the specified directory into the datapack"""
         shutil.copytree(directory, self.pack_dir, dirs_exist_ok=True)
+
+    def open(self, path: str) -> TextIOWrapper:
+        """
+        Open a file for writing in the datapack directory.
+        
+        Creates parent directories where necessary.
+        """
+        file_path = self.pack_dir / path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        return file_path.open('w')
+
+    def open_data(self, path: str) -> TextIOWrapper:
+        """
+        Open a file for writing in the datapack's `data/` directory.
+        
+        Creates parent directories where necessary.
+        """
+        file_path = self._data_dir / path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        return file_path.open('w')
