@@ -70,9 +70,7 @@ class Pack:
         self.pack_dir = Path(pack_dir)
         self.default_namespace = default_namespace
 
-        self.pack_dir.mkdir(parents=True, exist_ok=True)
         self._data_dir = self.pack_dir / 'data'
-        self._data_dir.mkdir(exist_ok=True)
         self._open_tags = {}
         self._ex_c = 1 # execute counter
         self._st_c = -1 # storage variable counter
