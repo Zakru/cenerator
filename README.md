@@ -35,6 +35,7 @@ import cenerator
 p = cenerator.Pack('hello_world',
     default_namespace='hello_world',
     description='A hello world datapack made with cenerator',
+    pack_format=71,
 )
 
 
@@ -46,6 +47,8 @@ def hello_world(c):
 This outputs a data pack which executes the command `say Hello, world!` on load.
 
 ### Macros
+
+The power of `cenerator` becomes more evident in more complex programs that need branching logic and complicated `/execute` chains.
 
 The following example showcases use of functions that take `c` and use it to output commands (referred to as "macros")
 
