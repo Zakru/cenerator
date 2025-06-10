@@ -51,11 +51,6 @@ PACK_FORMAT_WARNINGS = [
         last=7,
         warning='scoreboard length limits are not enforced',
     ),
-    FormatWarning(
-        first=71,
-        last=math.inf,
-        warning='NumberValue to_json_text may be unusable due to transition to SNBT',
-    ),
 ]
 
 

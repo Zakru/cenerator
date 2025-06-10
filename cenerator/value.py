@@ -1,5 +1,5 @@
 """
-Copyright (c) 2021 Zakru
+Copyright (c) 2021-2025 Zakru
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,11 @@ class NumberValue(ABC):
         """Converts this reference into a JSON text component"""
         ...
 
+    @abstractmethod
+    def to_snbt_text(self) -> str:
+        """Converts this reference into an SNBT text component"""
+        ...
+
 
 class StorageValue(NumberValue):
 
@@ -52,3 +57,6 @@ class StorageValue(NumberValue):
 
     def to_json_text(self) -> str:
         return f'{{"storage":"{self.storage}","nbt":"{self.path}"}}'
+
+    def to_snbt_text(self) -> str:
+        return f'{{storage:"{self.storage}",nbt:"{self.path}"}}'

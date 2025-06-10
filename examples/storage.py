@@ -30,7 +30,7 @@ p = cenerator.Pack('storage',
 
 
 def print_with_message(c: cenerator.C, message: str, value: cenerator.NumberValue):
-    c(f'tellraw @a {{"text":"{message}","extra":[{value.to_json_text()}]}}')
+    c(f'tellraw @a {{text:"{message}",extra:[{value.to_snbt_text()}]}}')
 
 
 @p.func(tags = ['minecraft:load'])
