@@ -34,7 +34,7 @@ def print_with_message(c: cenerator.C, message: str, value: cenerator.NumberValu
 
 @p.func(tags = ['minecraft:load'])
 def storage(c: cenerator.C):
-    stored = c.storage_value('5.6d')
+    stored = c.storage_value('5.6d', 'double')
     print_with_message(c, 'The value is ', stored)
     print_with_message(c, 'The casted value is ', stored.to_storage(c, 'int'))
     print_with_message(c, 'The time is ', c.store_storage('int', 'time query gametime'))

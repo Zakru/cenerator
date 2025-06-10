@@ -1,5 +1,5 @@
 """
-Copyright (c) 2021 Zakru
+Copyright (c) 2021-2025 Zakru
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,10 @@ p = cenerator.Pack('execute',
 
 @p.func(tags = ['minecraft:load'])
 def execute(c):
-    with c.ex('as @a') as c:
+    c('say Executing as all')
+
+    with c.ex('as @a'):
         c('say Hello from me!')
         c("say This command is 'execute'd.")
+
+    c('say Executed as all')

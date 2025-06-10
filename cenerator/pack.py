@@ -1,5 +1,5 @@
 """
-Copyright (c) 2021 Zakru
+Copyright (c) 2021-2025 Zakru
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -42,13 +42,18 @@ class C:
 
     @contextmanager
     def ex(self, setup: str = '') -> Generator['C', None, None]:
-        identifier = self.pack.parse_identifier(f'ex_{self.pack._ex_c}')
-        self.pack._ex_c += 1
+        identifier = self.pack.parse_identifier(f'_fn_{self.pack._fn_c}')
+        self.pack._fn_c += 1
 
         file_path = self.pack._data_dir / self.pack.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
         file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        prev_c = self.c
         with file_path.open('w') as file:
-            yield C(self.pack, lambda c: file.write(f'{c}\n'))
+            self.c = lambda c: file.write(f'{c}\n')
+            yield self
+        
+        self.c = prev_c
         self(f'execute {setup} run function {identifier}')
 
     def store_storage(self, type: str, command: str, scale: float = 1) -> StorageValue:
@@ -57,7 +62,7 @@ class C:
         self(f'execute store result storage cen:{self.pack.default_namespace} {p} {type} {scale} run {command}')
         return StorageValue(f'cen:{self.pack.default_namespace}', p, type)
 
-    def storage_value(self, value: str) -> StorageValue:
+    def storage_value(self, value: str, type: str) -> StorageValue:
         """Store a value in storage and return its reference"""
         p = self.pack.st_path()
         self(f'data modify storage cen:{self.pack.default_namespace} {p} set value {value}')
@@ -73,8 +78,8 @@ class Pack:
         self.pack_dir.mkdir(parents=True, exist_ok=True)
         self._data_dir = self.pack_dir / 'data'
         self._data_dir.mkdir(exist_ok=True)
-        self._open_tags = {}
-        self._ex_c = 1 # execute counter
+        self._open_tags: dict[str, list[str]] = {}
+        self._fn_c = 1 # function counter
         self._st_c = -1 # storage variable counter
         with (self.pack_dir / 'pack.mcmeta').open('w') as meta:
             json.dump({
@@ -84,20 +89,16 @@ class Pack:
                 },
             }, meta)
 
-        @self.func(name = 'cenerator:scoreboard', tags = ['minecraft:load'])
-        def _scoreboard(c):
-            c('scoreboard objectives add _cen dummy')
-
     def parse_identifier(self, s: str) -> Identifier:
         return Identifier(s, self.default_namespace)
 
     def func(self, name: Optional[str] = None, tags: List[str] = []) -> Callable[[Callable[[C], None]], Callable[[], str]]:
+        """Decorator for a data pack function"""
         def inner(f: Callable[[C], None]) -> Callable[[], str]:
             identifier = self.parse_identifier(name or f.__name__)
             def call() -> str:
                 return f'function {identifier}'
 
-            
             file_path = self._data_dir / self.parse_identifier(f"{identifier.namespace}:{'functions/' + identifier.name}").data_path('.mcfunction')
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w') as file:
@@ -109,9 +110,9 @@ class Pack:
                 self.add_to_tag(t, str(identifier))
 
             return call
-        
+
         return inner
-    
+
     def add_to_tag(self, tag: Identifier, item: str) -> None:
         tag.name = f'tags/{tag.name}'
         values = self._open_tags[str(tag)] if str(tag) in self._open_tags else []
@@ -121,7 +122,7 @@ class Pack:
         self._open_tags[str(tag)] = values
         with file_path.open('w') as f:
             json.dump({ 'values': values }, f)
-    
+
     def st_path(self) -> str:
         """Return a unique generated storage path"""
         self._st_c += 1
