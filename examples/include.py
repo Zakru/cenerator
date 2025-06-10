@@ -1,5 +1,5 @@
 """
-Copyright (c) 2021 Zakru
+Copyright (c) 2021-2025 Zakru
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ import cenerator
 p = cenerator.Pack('include',
     default_namespace='include',
     description='Cenerator include example',
+    pack_format=71,
 )
 
 try:

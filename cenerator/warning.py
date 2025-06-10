@@ -1,5 +1,5 @@
 """
-Copyright (c) 2021-2025 Zakru
+Copyright (c) 2025 Zakru
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,22 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import cenerator
+class PackFormatWarning(Warning):
 
-p = cenerator.Pack('storage',
-    default_namespace='storage',
-    description='Cenerator storage example',
-    pack_format=71,
-)
+    def __init__(self, got: int, reason: str):
+        message = f'pack_format {got} is only partially supported: {reason}'
 
-
-def print_with_message(c: cenerator.C, message: str, value: cenerator.NumberValue):
-    c(f'tellraw @a {{"text":"{message}","extra":[{value.to_json_text()}]}}')
-
-
-@p.func(tags = ['minecraft:load'])
-def storage(c: cenerator.C):
-    stored = c.storage_value('5.6d', 'double')
-    print_with_message(c, 'The value is ', stored)
-    print_with_message(c, 'The casted value is ', stored.to_storage(c, 'int'))
-    print_with_message(c, 'The time is ', c.store_storage('int', 'time query gametime'))
+        super().__init__(message)

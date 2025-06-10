@@ -25,6 +25,7 @@ import cenerator
 p = cenerator.Pack('execute',
     default_namespace='execute',
     description='Cenerator execute example',
+    pack_format=71,
 )
 
 

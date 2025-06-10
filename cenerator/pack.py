@@ -21,14 +21,42 @@ SOFTWARE.
 """
 
 from contextlib import contextmanager
+from dataclasses import dataclass
 import json
+import math
 from numbers import Real
 from pathlib import Path
 import shutil
 from typing import Callable, Generator, List, Optional, Union
+import warnings
+
+from cenerator.warning import PackFormatWarning
 
 from .identifier import Identifier
 from .value import StorageValue
+
+SUPPORTED_PACK_FORMATS = {4, 5, 6, 7, 8, 9, 10, 12, 15, 18, 26, 41, 48, 57, 61, 71}
+
+
+@dataclass
+class FormatWarning:
+    first: float
+    last: float
+    warning: str
+
+
+PACK_FORMAT_WARNINGS = [
+    FormatWarning(
+        first=4,
+        last=7,
+        warning='scoreboard length limits are not enforced',
+    ),
+    FormatWarning(
+        first=71,
+        last=math.inf,
+        warning='NumberValue to_json_text may be unusable due to transition to SNBT',
+    ),
+]
 
 
 class C:
@@ -71,7 +99,20 @@ class C:
 
 class Pack:
 
-    def __init__(self, pack_dir: str, default_namespace: str = 'minecraft', description: str = ''):
+    def __init__(self, pack_dir: str, default_namespace: str = 'minecraft', description: str = '', pack_format: Optional[int] = None):
+        if pack_format is None:
+            warnings.warn(DeprecationWarning('Implicit pack_format is deprecated. Using old default of 7.'))
+            pack_format = 7
+        
+        format_warnings = []
+
+        if pack_format not in SUPPORTED_PACK_FORMATS:
+            format_warnings.append(f'format is unknown and may not be fully supported')
+        
+        format_warnings.extend(warning.warning for warning in PACK_FORMAT_WARNINGS if pack_format >= warning.first and pack_format <= warning.last)
+        if format_warnings:
+            warnings.warn(PackFormatWarning(pack_format, ', '.join(format_warnings)))
+
         self.pack_dir = Path(pack_dir)
         self.default_namespace = default_namespace
 
@@ -84,7 +125,7 @@ class Pack:
         with (self.pack_dir / 'pack.mcmeta').open('w') as meta:
             json.dump({
                 'pack': {
-                    'pack_format': 7,
+                    'pack_format': pack_format,
                     'description': description,
                 },
             }, meta)
