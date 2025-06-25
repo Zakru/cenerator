@@ -1,6 +1,5 @@
 [project]
 name = "cenerator"
-version = "0.1.4"
 authors = [
     { name = "Zakru", email = "me@zakru.fi" },
 ]
@@ -17,6 +16,7 @@ classifiers = [
 ]
 license = "MIT"
 license-files = ["LICENSE"]
+dynamic = ["version"]
 
 [project.urls]
 "Source Code" = "https://github.com/Zakru/cenerator"
@@ -25,3 +25,6 @@ license-files = ["LICENSE"]
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "cenerator.__version__"}
